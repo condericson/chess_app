@@ -84,6 +84,10 @@ $(document).ready(function () {
 		if (boardState.areIndicatorsVisible == false) {
 			$('.cell').removeClass("indicating");
 		}
+		$(window).mousedown(function() {
+			$('.cell').removeClass("indicating");
+			boardState.areIndicatorsVisible = false;
+		});
 		$(".piece").mousedown(function () {
 			addMovementIndicators(this);
 		})
@@ -117,6 +121,10 @@ $(document).ready(function () {
 
 		// }
 	}
+
+	//on mouse down, add indicator for specific piece based on piece(color and type)
+	//on drag AND THEN mouse up, remove indicators if position has changed, else, 
+
 
 
 
