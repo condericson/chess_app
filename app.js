@@ -1,16 +1,10 @@
 $(document).ready(function () {
 	console.log("Document ready...");
 
+
 	var boardState = {
 		areIndicatorsVisible: false,
-	}
-
-	var selectedColor = "white";
-
-	function init() {
-		setBoard(selectedColor);
-		addDroppability();
-		determineIndicatorVisibility();
+		selectedPieceCell: "zz",
 	}
 
 	var pieces = {
@@ -28,9 +22,29 @@ $(document).ready(function () {
 		blackPawn: "&#9823;",
 	}
 
+	var selectedColor = "white";
+
+	function modifyState(stateValue, value) {
+		boardState.stateValue = value;
+		// console.log(`modifying state: ${stateValue} = ${value}`);
+		if (boardState.areIndicatorsVisible == false) {
+			$('.cell').removeClass("indicating");
+		}
+	}
+
+	function init() {
+		setBoard(selectedColor);
+		addDroppability();
+		determineIndicatorVisibility();
+
+	}
+
 	function setBoard(startingColor) {
 		let order = [];
-		function pieceHtml(piece) { return `<div class="piece">${piece}</div>`; }
+		function pieceHtml(piece) {
+			var key = Object.keys(pieces).find(key => pieces[key] === piece);
+			return `<div class="piece" data-piece="${key}">${piece}</div>`; 
+		}
 		if (startingColor == "white") {
 			order = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
 			let rowNumber = 8;
@@ -67,66 +81,72 @@ $(document).ready(function () {
 		$('.piece').draggable({ containment: "table", revert: 'invalid' });
 		$('td').droppable({
 			drop: function (ev, ui) {
+				var originalCell = $(ui.draggable).parent();
 				var dropped = ui.draggable;
 				var droppedOn = $(this);
 				$(droppedOn).droppable("disable");
 				$(dropped).parent().droppable("enable");
 				$(dropped).detach().css({ top: 0, left: 0 }).appendTo(droppedOn);
+				removeIndicator();
 			}
 		});
-
 		$('td').not('td:empty').droppable("disable");
 	}
 
-
-
 	function determineIndicatorVisibility() {
-		if (boardState.areIndicatorsVisible == false) {
-			$('.cell').removeClass("indicating");
-		}
-		$(window).mousedown(function() {
-			$('.cell').removeClass("indicating");
-			boardState.areIndicatorsVisible = false;
+		$(window).mousedown(function () {
+			modifyState("areIndicatorsVisible", false);
 		});
-		$(".piece").mousedown(function () {
+		$(".piece").mousedown(function (e) {
+			e.stopPropagation();
+			console.log(selectedColor);
+			console.log($(this).attr('data-piece').slice(0,5));
+			console.log(selectedColor != $(this).attr('data-piece').slice(0,4));
+			console.log(typeof($(this).attr('data-piece').slice(0,4)));/*************/
+			if(selectedColor != $(this).attr('data-piece').slice(0,4)) {
+				console.log("breaking");
+				return;
+				console.log("didn't break");
+			}
+			let currentCell = $(this).parent().attr("id");
+			modifyState("selectedPieceCell", currentCell);
 			addMovementIndicators(this);
-		})
-
-		// let visible = false;
-		// $(".piece").mousedown(function () {
-		// 	visible = true;
-		// })
-		// 	.mousemove(function () {
-		// 		visible = true;
-		// 	})
-		// 	.mouseup(function () {
-		// 		var wasDragging = isDragging;
-		// 		visible = false;
-		// 		if (!wasDragging) {
-		// 			$("#throbble").toggle();
-		// 		}
-		// 	});
+		});
 	}
 
+	function removeIndicator() {
+		modifyState("areIndicatorsVisible", false);
+	}
 
-
-	// This class will take in the element's cells to gain the indicating class and add that class while mutating state.
 	function addMovementIndicators(element) {
-		console.log(element);
-		console.log($(element).text());
-		boardState.areIndicatorsVisible = true;
-		console.log(boardState);
-		$('.cell').addClass('indicating');
-		// if(typeOfPiece == pieces.whitePawn) {
-
-		// }
+		modifyState("areIndicatorsVisible", true);
+		let cells = determineIndicatorCells($(element).attr('data-piece'), $(element).parent().attr('id'));
+		cells.forEach(function (cell) {
+			$(`#${cell}`).addClass('indicating');
+		});
+		$('td').not('.indicating').droppable("disable");
 	}
 
-	//on mouse down, add indicator for specific piece based on piece(color and type)
-	//on drag AND THEN mouse up, remove indicators if position has changed, else, 
+	function determineIndicatorCells(pieceName, cell) {
+		let cellArray = {
+			moves: [],
+			attackOptions: [],
+		};
+		console.log(pieceName + " in " + cell);
+		let splitCell = cell.split('');
+		console.log("splitCell: " + splitCell);
+		if (pieceName == "whitePawn") {
+			cellArray.moves.push(splitCell[0] + splitCell[1]+1);
+			if(splitCell[1] == 2) {
+				cellArray.moves.push(
+					splitCell[0] + splitCell[1]+2
+				);
+			}
+			
+		}
 
-
-
+			return cellArray;
+	}
 
 
 	init();
