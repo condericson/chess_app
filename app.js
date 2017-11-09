@@ -43,7 +43,7 @@ $(document).ready(function () {
 		let order = [];
 		function pieceHtml(piece) {
 			var key = Object.keys(pieces).find(key => pieces[key] === piece);
-			return `<div class="piece" data-piece="${key}">${piece}</div>`; 
+			return `<div class="piece" data-piece="${key}">${piece}</div>`;
 		}
 		if (startingColor == "white") {
 			order = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
@@ -97,16 +97,12 @@ $(document).ready(function () {
 		$(window).mousedown(function () {
 			modifyState("areIndicatorsVisible", false);
 		});
-		$(".piece").mousedown(function (e) {
+		$(".piece").mouseup(function (e) {
 			e.stopPropagation();
-			console.log(selectedColor);
-			console.log($(this).attr('data-piece').slice(0,5));
-			console.log(selectedColor != $(this).attr('data-piece').slice(0,4));
-			console.log(typeof($(this).attr('data-piece').slice(0,4)));/*************/
-			if(selectedColor != $(this).attr('data-piece').slice(0,4)) {
+			let pieceColor = $(this).attr('data-piece').slice(0, 5);
+			if (selectedColor != pieceColor) {
 				console.log("breaking");
 				return;
-				console.log("didn't break");
 			}
 			let currentCell = $(this).parent().attr("id");
 			modifyState("selectedPieceCell", currentCell);
@@ -118,14 +114,21 @@ $(document).ready(function () {
 		modifyState("areIndicatorsVisible", false);
 	}
 
+
 	function addMovementIndicators(element) {
 		modifyState("areIndicatorsVisible", true);
 		let cells = determineIndicatorCells($(element).attr('data-piece'), $(element).parent().attr('id'));
-		cells.forEach(function (cell) {
+		console.log("cells:");
+		console.log(cells);
+		cells.moves.forEach(function (cell) {
 			$(`#${cell}`).addClass('indicating');
+		});
+		cells.attackOptions.forEach(function (cell) {
+			$(`#${cell}`).addClass('attackable');
 		});
 		$('td').not('.indicating').droppable("disable");
 	}
+
 
 	function determineIndicatorCells(pieceName, cell) {
 		let cellArray = {
@@ -134,18 +137,18 @@ $(document).ready(function () {
 		};
 		console.log(pieceName + " in " + cell);
 		let splitCell = cell.split('');
-		console.log("splitCell: " + splitCell);
+		splitCell[1] = parseInt(splitCell[1]);
+		console.log("splitCell: ");
+		console.log(splitCell);
 		if (pieceName == "whitePawn") {
-			cellArray.moves.push(splitCell[0] + splitCell[1]+1);
-			if(splitCell[1] == 2) {
-				cellArray.moves.push(
-					splitCell[0] + splitCell[1]+2
-				);
+			cellArray.moves.push(splitCell[0] + (splitCell[1] + 1));
+			if (splitCell[1] == 2) {
+				cellArray.moves.push(splitCell[0] + (splitCell[1] + 2));
 			}
-			
+
 		}
 
-			return cellArray;
+		return cellArray;
 	}
 
 
