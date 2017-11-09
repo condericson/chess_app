@@ -97,9 +97,10 @@ $(document).ready(function () {
 		$(window).mousedown(function () {
 			modifyState("areIndicatorsVisible", false);
 		});
-		$(".piece").mouseup(function (e) {
+		$(".piece").mousedown(function (e) {
 			e.stopPropagation();
 			let pieceColor = $(this).attr('data-piece').slice(0, 5);
+			console.log(pieceColor);
 			if (selectedColor != pieceColor) {
 				console.log("breaking");
 				return;

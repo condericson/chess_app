@@ -1,5 +1,18 @@
-#gameboard {
+* {
+	box-sizing: border-box;
+	margin: 0px;
+	padding: 0px;
+}
+
+#gameboard{
+	position: relative;
+}
+
+
+#field {
 	margin: 0 auto;
+	padding-left: 80px;
+	padding-top: 80px;
 }
 td {
 	width: 80px;
@@ -10,10 +23,10 @@ td {
 	vertical-align: middle;
 }
 
-tr:nth-child(odd) td:nth-child(even), tr:nth-child(even) td:nth-child(odd) {
+tbody > tr:nth-child(odd) td:nth-child(even), tbody > tr:nth-child(even) td:nth-child(odd) {
 	background-color: grey;
 }
-tr:nth-child(odd) td:nth-child(odd), tr:nth-child(even) td:nth-child(even){
+tbody > tr:nth-child(odd) td:nth-child(odd), tbody > tr:nth-child(even) td:nth-child(even){
 	background-color: #CCC;
 }
 
@@ -21,6 +34,18 @@ tr:nth-child(odd) td:nth-child(odd), tr:nth-child(even) td:nth-child(even){
 	cursor: pointer;
 }
 
-#gameboard > tbody > tr > td.indicating {
+#field > tbody > tr > td.indicating {
 	background-color: blue;
+}
+
+thead {
+	position: relative;
+}
+
+.numberAxis {
+	position: absolute;
+}
+
+.numberAxis > td {
+	display: block;
 }
