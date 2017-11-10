@@ -40,16 +40,23 @@ $(document).ready(function () {
 	}
 
 	function setBoard(startingColor) {
-		let order = [];
+		let orderPlayer = [];
+		let orderOpponent = [];
 		function pieceHtml(piece) {
 			var key = Object.keys(pieces).find(key => pieces[key] === piece);
-			return `<div class="piece" data-piece="${key}">${piece}</div>`;
+			return `<div class="piece no-select" data-piece="${key}">${piece}</div>`;
 		}
 		if (startingColor == "white") {
-			order = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
+			orderPlayer = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
+			orderOpponent = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
+		}
+		if (startingColor == "black") {
+			orderOpponent = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
+			orderPlayer = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
+		}
 			let rowNumber = 8;
 			let columnLetter = "a";
-			order.forEach(function (piece) {
+			orderOpponent.forEach(function (piece) {
 				let cell = columnLetter + rowNumber;
 				$(`#${cell}`).append(pieceHtml(piece));
 				if (columnLetter == "h") {
@@ -60,10 +67,9 @@ $(document).ready(function () {
 					columnLetter = String.fromCharCode(columnLetter.charCodeAt(0) + 1);
 				}
 			})
-			order = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
 			rowNumber = 1;
 			columnLetter = "a";
-			order.forEach(function (piece) {
+			orderPlayer.forEach(function (piece) {
 				let cell = columnLetter + rowNumber;
 				$(`#${cell}`).append(pieceHtml(piece));
 				if (columnLetter == "h") {
@@ -74,7 +80,6 @@ $(document).ready(function () {
 					columnLetter = String.fromCharCode(columnLetter.charCodeAt(0) + 1);
 				}
 			})
-		}
 	}
 
 	function addDroppability() {
@@ -127,6 +132,7 @@ $(document).ready(function () {
 		cells.attackOptions.forEach(function (cell) {
 			$(`#${cell}`).addClass('attackable');
 		});
+		$('td').droppable("enable");
 		$('td').not('.indicating').droppable("disable");
 	}
 
@@ -139,16 +145,14 @@ $(document).ready(function () {
 		console.log(pieceName + " in " + cell);
 		let splitCell = cell.split('');
 		splitCell[1] = parseInt(splitCell[1]);
-		console.log("splitCell: ");
-		console.log(splitCell);
 		if (pieceName == "whitePawn") {
 			cellArray.moves.push(splitCell[0] + (splitCell[1] + 1));
 			if (splitCell[1] == 2) {
 				cellArray.moves.push(splitCell[0] + (splitCell[1] + 2));
 			}
-
 		}
-
+		console.log('cellArray:');
+		console.log(cellArray);
 		return cellArray;
 	}
 

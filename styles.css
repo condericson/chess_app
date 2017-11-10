@@ -6,13 +6,13 @@
 
 #gameboard{
 	position: relative;
+	width: 698px;
+	margin: 0 auto;
 }
 
 
 #field {
-	margin: 0 auto;
-	padding-left: 80px;
-	padding-top: 80px;
+	padding: 20px;
 }
 td {
 	width: 80px;
@@ -30,12 +30,16 @@ tbody > tr:nth-child(odd) td:nth-child(odd), tbody > tr:nth-child(even) td:nth-c
 	background-color: #CCC;
 }
 
-.piece {
+.playable {
 	cursor: pointer;
 }
 
+.playable:hover {
+	color: rgb(113, 166, 228);
+}
+
 #field > tbody > tr > td.indicating {
-	background-color: blue;
+	background-color: green;
 }
 
 thead {
@@ -44,8 +48,54 @@ thead {
 
 .numberAxis {
 	position: absolute;
+	font-size: 0px;
+	top: 21px;
 }
 
-.numberAxis > td {
+.numberAxis > span {
 	display: block;
+	height: 82px;
+	font-size: 16px;
+	padding-top: 30px;
+	text-align: center;
+	width: 21px;
 }
+
+.letterAxis {
+	position: absolute;
+	left: 21px;
+	font-size: 0px;
+}
+
+.letterAxis > span {
+	width: 82px;
+	display: inline-block;
+	text-align: center;
+	font-size: 16px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.noselect {
+	-webkit-touch-callout: none; /* iOS Safari */
+	  -webkit-user-select: none; /* Safari */
+	   -khtml-user-select: none; /* Konqueror HTML */
+		 -moz-user-select: none; /* Firefox */
+		  -ms-user-select: none; /* Internet Explorer/Edge */
+			  user-select: none; /* Non-prefixed version, currently
+									supported by Chrome and Opera */
+  }
