@@ -22,7 +22,7 @@ $(document).ready(function () {
 		blackPawn: "&#9823;",
 	}
 
-	var selectedColor = "white";
+	var selectedColor = "black";
 
 	function modifyState(stateValue, value) {
 		boardState.stateValue = value;
@@ -40,50 +40,86 @@ $(document).ready(function () {
 	}
 
 	function setBoard(startingColor) {
-		let orderPlayer = [];
-		let orderOpponent = [];
-		function pieceHtml(piece) {
+		let orderPlayer = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
+		let orderOpponent = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
+		function pieceHtml(piece, who) {
 			var key = Object.keys(pieces).find(key => pieces[key] === piece);
-			return `<div class="piece no-select" data-piece="${key}">${piece}</div>`;
-		}
-		if (startingColor == "white") {
-			orderPlayer = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
-			orderOpponent = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
+			let html;
+			if(who == "opponent") {
+				html = `<div class="piece opponent noselect" data-piece="${key}">${piece}</div>`;
+			}
+			if(who == "player") {
+				html = `<div class="piece playable noselect" data-piece="${key}">${piece}</div>`;
+			}
+			return html;
 		}
 		if (startingColor == "black") {
-			orderOpponent = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
-			orderPlayer = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
+			setCellIdsForBlack();
+			changeAxes();
 		}
-			let rowNumber = 8;
-			let columnLetter = "a";
-			orderOpponent.forEach(function (piece) {
-				let cell = columnLetter + rowNumber;
-				$(`#${cell}`).append(pieceHtml(piece));
-				if (columnLetter == "h") {
-					columnLetter = "a";
-					rowNumber = 7;
-				}
-				else {
-					columnLetter = String.fromCharCode(columnLetter.charCodeAt(0) + 1);
-				}
-			})
-			rowNumber = 1;
-			columnLetter = "a";
-			orderPlayer.forEach(function (piece) {
-				let cell = columnLetter + rowNumber;
-				$(`#${cell}`).append(pieceHtml(piece));
-				if (columnLetter == "h") {
-					columnLetter = "a";
-					rowNumber = 2;
-				}
-				else {
-					columnLetter = String.fromCharCode(columnLetter.charCodeAt(0) + 1);
-				}
-			})
+		let rowNumber = 8;
+		let columnLetter = "a";
+		orderOpponent.forEach(function (piece) {
+			let cell = columnLetter + rowNumber;
+			$(`#${cell}`).append(pieceHtml(piece, "opponent"));
+			if (columnLetter == "h") {
+				columnLetter = "a";
+				rowNumber = 7;
+			}
+			else {
+				columnLetter = String.fromCharCode(columnLetter.charCodeAt(0) + 1);
+			}
+		})
+		rowNumber = 1;
+		columnLetter = "a";
+		orderPlayer.forEach(function (piece) {
+			let cell = columnLetter + rowNumber;
+			$(`#${cell}`).append(pieceHtml(piece, "player"));
+			if (columnLetter == "h") {
+				columnLetter = "a";
+				rowNumber = 2;
+			}
+			else {
+				columnLetter = String.fromCharCode(columnLetter.charCodeAt(0) + 1);
+			}
+		})
+	}
+
+	function setCellIdsForBlack() {
+		var allCells = [];
+		$('tbody').children().each(function (rowPlacement) {
+			$(this).children().each(function (cell) {
+				allCells.push($(this));
+			});
+		});
+		console.log("allCells:");
+		console.log(allCells);
+		var currentLetter = "h";
+		var currentNumber = 1;
+		for (let i = 0; i < allCells.length; i++) {
+			$(allCells[i]).attr("id", currentLetter + currentNumber);
+			if (currentLetter == 'a') {
+				currentLetter = "i";
+				currentNumber++;
+			}
+			currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) - 1);
+		}
+		console.log("CurrentNumber iterated to: " + currentNumber);
+	}
+
+	function changeAxes() {
+		var letterAxisLabels = $('.letterAxis').children();
+		var numberAxisLabels = $('.numberAxis').children();
+		let xAxis = ['H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
+		let yAxis = [1, 2, 3, 4, 5, 6, 7, 8];
+		for(let j = 0; j < letterAxisLabels.length; j++) {
+			$(letterAxisLabels[j]).text(xAxis[j]);
+			$(numberAxisLabels[j]).text(yAxis[j]);
+		}
 	}
 
 	function addDroppability() {
-		$('.piece').draggable({ containment: "table", revert: 'invalid' });
+		$('.playable').draggable({ containment: "table", revert: 'invalid' });
 		$('td').droppable({
 			drop: function (ev, ui) {
 				var originalCell = $(ui.draggable).parent();
@@ -102,7 +138,7 @@ $(document).ready(function () {
 		$(window).mousedown(function () {
 			modifyState("areIndicatorsVisible", false);
 		});
-		$(".piece").mousedown(function (e) {
+		$(".playable").mousedown(function (e) {
 			e.stopPropagation();
 			let pieceColor = $(this).attr('data-piece').slice(0, 5);
 			console.log(pieceColor);
