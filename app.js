@@ -22,13 +22,14 @@ $(document).ready(function () {
 		blackPawn: "&#9823;",
 	}
 
-	var selectedColor = "black";
+	var selectedColor = "white";
 
 	function modifyState(stateValue, value) {
 		boardState.stateValue = value;
 		// console.log(`modifying state: ${stateValue} = ${value}`);
 		if (boardState.areIndicatorsVisible == false) {
 			$('.cell').removeClass("indicating");
+			$('.cell').removeClass("attackable");
 		}
 	}
 
@@ -42,13 +43,13 @@ $(document).ready(function () {
 	function setBoard(startingColor) {
 		let orderPlayer = [pieces.whiteRook, pieces.whiteKnight, pieces.whiteBishop, pieces.whiteQueen, pieces.whiteKing, pieces.whiteBishop, pieces.whiteKnight, pieces.whiteRook, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn, pieces.whitePawn];
 		let orderOpponent = [pieces.blackRook, pieces.blackKnight, pieces.blackBishop, pieces.blackQueen, pieces.blackKing, pieces.blackBishop, pieces.blackKnight, pieces.blackRook, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn, pieces.blackPawn];
-		function pieceHtml(piece, who) {
+		function pieceHtml(piece, playersColor, who) {
 			var key = Object.keys(pieces).find(key => pieces[key] === piece);
 			let html;
-			if(who == "opponent") {
+			if ((playersColor == "white" && who == "highrow") || (playersColor == "black" && who == "lowrow")) {
 				html = `<div class="piece opponent noselect" data-piece="${key}">${piece}</div>`;
 			}
-			if(who == "player") {
+			if ((playersColor == "white" && who == "lowrow") || (playersColor == "black" && who == "highrow")) {
 				html = `<div class="piece playable noselect" data-piece="${key}">${piece}</div>`;
 			}
 			return html;
@@ -61,7 +62,7 @@ $(document).ready(function () {
 		let columnLetter = "a";
 		orderOpponent.forEach(function (piece) {
 			let cell = columnLetter + rowNumber;
-			$(`#${cell}`).append(pieceHtml(piece, "opponent"));
+			$(`#${cell}`).append(pieceHtml(piece, selectedColor, "highrow"));
 			if (columnLetter == "h") {
 				columnLetter = "a";
 				rowNumber = 7;
@@ -74,7 +75,7 @@ $(document).ready(function () {
 		columnLetter = "a";
 		orderPlayer.forEach(function (piece) {
 			let cell = columnLetter + rowNumber;
-			$(`#${cell}`).append(pieceHtml(piece, "player"));
+			$(`#${cell}`).append(pieceHtml(piece, selectedColor, "lowrow"));
 			if (columnLetter == "h") {
 				columnLetter = "a";
 				rowNumber = 2;
@@ -92,8 +93,6 @@ $(document).ready(function () {
 				allCells.push($(this));
 			});
 		});
-		console.log("allCells:");
-		console.log(allCells);
 		var currentLetter = "h";
 		var currentNumber = 1;
 		for (let i = 0; i < allCells.length; i++) {
@@ -104,7 +103,6 @@ $(document).ready(function () {
 			}
 			currentLetter = String.fromCharCode(currentLetter.charCodeAt(0) - 1);
 		}
-		console.log("CurrentNumber iterated to: " + currentNumber);
 	}
 
 	function changeAxes() {
@@ -112,7 +110,7 @@ $(document).ready(function () {
 		var numberAxisLabels = $('.numberAxis').children();
 		let xAxis = ['H', 'G', 'F', 'E', 'D', 'C', 'B', 'A'];
 		let yAxis = [1, 2, 3, 4, 5, 6, 7, 8];
-		for(let j = 0; j < letterAxisLabels.length; j++) {
+		for (let j = 0; j < letterAxisLabels.length; j++) {
 			$(letterAxisLabels[j]).text(xAxis[j]);
 			$(numberAxisLabels[j]).text(yAxis[j]);
 		}
@@ -125,8 +123,11 @@ $(document).ready(function () {
 				var originalCell = $(ui.draggable).parent();
 				var dropped = ui.draggable;
 				var droppedOn = $(this);
+				console.log('droppedOn:');
+				console.log(droppedOn);
 				$(droppedOn).droppable("disable");
 				$(dropped).parent().droppable("enable");
+				$(droppedOn).empty();
 				$(dropped).detach().css({ top: 0, left: 0 }).appendTo(droppedOn);
 				removeIndicator();
 			}
@@ -135,15 +136,17 @@ $(document).ready(function () {
 	}
 
 	function determineIndicatorVisibility() {
-		$(window).mousedown(function () {
+		$(window).hover(function () {
 			modifyState("areIndicatorsVisible", false);
 		});
-		$(".playable").mousedown(function (e) {
+		$(".playable").mouseup(function () {
+			modifyState("areIndicatorsVisible", false);
+		});
+		$(".playable").on('mouseover || mousedown', function (e) {
 			e.stopPropagation();
 			let pieceColor = $(this).attr('data-piece').slice(0, 5);
-			console.log(pieceColor);
 			if (selectedColor != pieceColor) {
-				console.log("breaking");
+				console.log("broke");
 				return;
 			}
 			let currentCell = $(this).parent().attr("id");
@@ -160,16 +163,20 @@ $(document).ready(function () {
 	function addMovementIndicators(element) {
 		modifyState("areIndicatorsVisible", true);
 		let cells = determineIndicatorCells($(element).attr('data-piece'), $(element).parent().attr('id'));
-		console.log("cells:");
-		console.log(cells);
 		cells.moves.forEach(function (cell) {
-			$(`#${cell}`).addClass('indicating');
+			if ($(`#${cell}`).is(':empty')) {
+				$(`#${cell}`).addClass('indicating');
+			}
 		});
 		cells.attackOptions.forEach(function (cell) {
-			$(`#${cell}`).addClass('attackable');
+			if($(`#${cell}`).children().hasClass('opponent')) {
+				$(`#${cell}`).addClass('attackable');
+			}
+			
 		});
-		$('td').droppable("enable");
-		$('td').not('.indicating').droppable("disable");
+		$('td').droppable("disable");
+		$('.indicating').droppable("enable");
+		$('.attackable').droppable("enable");
 	}
 
 
@@ -181,15 +188,65 @@ $(document).ready(function () {
 		console.log(pieceName + " in " + cell);
 		let splitCell = cell.split('');
 		splitCell[1] = parseInt(splitCell[1]);
-		if (pieceName == "whitePawn") {
-			cellArray.moves.push(splitCell[0] + (splitCell[1] + 1));
-			if (splitCell[1] == 2) {
-				cellArray.moves.push(splitCell[0] + (splitCell[1] + 2));
+
+		//Piece movement rules
+		switch (pieceName) {
+			case "whitePawn": {
+				cellArray.moves.push(splitCell[0] + (splitCell[1] + 1));
+				if (splitCell[1] == 2) {
+					cellArray.moves.push(splitCell[0] + (splitCell[1] + 2));
+				}
+				// var attackableCells = [(iterateLetter(splitCell[0], -1) + (splitCell[1] + 1)), (iterateLetter(splitCell[0], 1) + (splitCell[1] + 1))];
+				cellArray.attackOptions = [targetDiagonalCell(cell, 1), targetDiagonalCell(cell, 2)];
+				console.log(cellArray.attackOptions);
+				break;
 			}
+			case "whiteRook": {
+				break;
+			}
+			case "blackPawn": {
+				cellArray.moves.push(splitCell[0] + (splitCell[1] - 1));
+				if (splitCell[1] == 7) {
+					cellArray.moves.push(splitCell[0] + (splitCell[1] - 2));
+				}
+				break;
+			}
+
+
 		}
-		console.log('cellArray:');
-		console.log(cellArray);
 		return cellArray;
+	}
+
+	//Cell targetting
+	function targetDiagonalCell(cell, quadrant) {
+
+		let splitCell = cell.split('');
+		let letter = splitCell[0];
+		let number = parseInt(splitCell[1]);
+
+		let directionalArray = [];
+		switch (quadrant) {
+			case 1:
+				directionalArray = [1, 1];
+				break;
+			case 2:
+				directionalArray = [-1, 1];
+				break;
+			case 3:
+				directionalArray = [-1, -1];
+				break;
+			case 4:
+				directionalArray = [1, -1];
+				break;
+		}
+		let returnedCell = iterateLetter(letter, directionalArray[0]) + (number + directionalArray[1]);
+		console.log("returnedCell: " + returnedCell);
+		return returnedCell;
+	}
+
+
+	function iterateLetter(letter, iteration) {
+		return String.fromCharCode(letter.charCodeAt() + iteration)
 	}
 
 
