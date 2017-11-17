@@ -5,6 +5,7 @@ $(document).ready(function () {
 	var boardState = {
 		areIndicatorsVisible: false,
 		selectedPieceCell: "zz",
+		selectedColor: "white",
 	}
 
 	var pieces = {
@@ -22,11 +23,10 @@ $(document).ready(function () {
 		blackPawn: "&#9823;",
 	}
 
-	var selectedColor = "white";
+
 
 	function modifyState(stateValue, value) {
 		boardState.stateValue = value;
-		// console.log(`modifying state: ${stateValue} = ${value}`);
 		if (boardState.areIndicatorsVisible == false) {
 			$('.cell').removeClass("indicating");
 			$('.cell').removeClass("attackable");
@@ -34,10 +34,20 @@ $(document).ready(function () {
 	}
 
 	function init() {
-		setBoard(selectedColor);
+		setBoard(boardState.selectedColor);
+		// setBoardDev(boardState.selectedColor, pieces.whiteKnight);
 		addDroppability();
 		determineIndicatorVisibility();
 
+	}
+
+	function setBoardDev(startingColor, piece) {
+		var key = Object.keys(pieces).find(key => pieces[key] === piece);
+		$(`#f5`).append(`<div class="piece playable noselect" data-piece="${key}">${piece}</div>`);
+		$(`#f6`).append(`<div class="piece playable noselect" data-piece="whitePawn">${pieces.whitePawn}</div>`);
+		for (let i = 0; i < 9; i++) {
+			$(`#b${i}`).append(`<div class="piece opponent noselect" data-piece="blackPawn">${pieces.blackPawn}</div>`);
+		}
 	}
 
 	function setBoard(startingColor) {
@@ -62,7 +72,7 @@ $(document).ready(function () {
 		let columnLetter = "a";
 		orderOpponent.forEach(function (piece) {
 			let cell = columnLetter + rowNumber;
-			$(`#${cell}`).append(pieceHtml(piece, selectedColor, "highrow"));
+			$(`#${cell}`).append(pieceHtml(piece, boardState.selectedColor, "highrow"));
 			if (columnLetter == "h") {
 				columnLetter = "a";
 				rowNumber = 7;
@@ -75,7 +85,7 @@ $(document).ready(function () {
 		columnLetter = "a";
 		orderPlayer.forEach(function (piece) {
 			let cell = columnLetter + rowNumber;
-			$(`#${cell}`).append(pieceHtml(piece, selectedColor, "lowrow"));
+			$(`#${cell}`).append(pieceHtml(piece, boardState.selectedColor, "lowrow"));
 			if (columnLetter == "h") {
 				columnLetter = "a";
 				rowNumber = 2;
@@ -145,7 +155,7 @@ $(document).ready(function () {
 		$(".playable").on('mouseover || mousedown', function (e) {
 			e.stopPropagation();
 			let pieceColor = $(this).attr('data-piece').slice(0, 5);
-			if (selectedColor != pieceColor) {
+			if (boardState.selectedColor != pieceColor) {
 				console.log("broke");
 				return;
 			}
@@ -186,32 +196,27 @@ $(document).ready(function () {
 			attackOptions: [],
 		};
 		console.log(pieceName + " in " + cell);
-		let splitCell = cell.split('');
-		splitCell[1] = parseInt(splitCell[1]);
 
 		//Piece movement rules
 		switch (pieceName) {
 			case "whitePawn": {
-				cellArray.moves.push(splitCell[0] + (splitCell[1] + 1));
+				cellArray.moves.push(targetHorizontalCell(cell, "up"));
+				let splitCell = cell.split('');
+				splitCell[1] = parseInt(splitCell[1]);
 				if (splitCell[1] == 2) {
-					cellArray.moves.push(splitCell[0] + (splitCell[1] + 2));
+					cellArray.moves.push(targetHorizontalCell(cellArray.moves[0], "up"));
 				}
 				cellArray.attackOptions = [targetDiagonalCell(cell, 1), targetDiagonalCell(cell, 2)];
-				console.log(cellArray.attackOptions);
 				break;
 			}
 			case "whiteRook": {
 				let directions = ["up", "down", "left", "right"];
-				for(let i = 0; i < directions.length; i++) {
+				for (let i = 0; i < directions.length; i++) {
 					let continuing = "yes";
 					let targetedCell = targetHorizontalCell(cell, directions[i]);
 					while (continuing == "yes") {
-						console.log("this should be false:");
-						console.log($(`#${targetedCell}`));
-						console.log($(`#${targetedCell}`).is(':empty'));
 						if (!$(`#${targetedCell}`).is(':empty')) {
 							continuing = "no";
-							console.log("end");
 						}
 						if ($(`#${targetedCell}`).children().hasClass('opponent')) {
 							cellArray.attackOptions.push(targetedCell)
@@ -220,9 +225,109 @@ $(document).ready(function () {
 							cellArray.moves.push(targetedCell);
 							targetedCell = targetHorizontalCell(targetedCell, directions[i]);
 						}
-						console.log("here");
 					}
-					
+				}
+				break;
+			}
+			case "whiteBishop": {
+				let quadrants = [1, 2, 3, 4];
+				for (let i = 0; i < quadrants.length; i++) {
+					let continuing = "yes";
+					let targetedCell = targetDiagonalCell(cell, quadrants[i]);
+					while (continuing == "yes") {
+						if (!$(`#${targetedCell}`).is(':empty')) {
+							continuing = "no";
+						}
+						if ($(`#${targetedCell}`).children().hasClass('opponent')) {
+							cellArray.attackOptions.push(targetedCell)
+						}
+						else {
+							cellArray.moves.push(targetedCell);
+							targetedCell = targetDiagonalCell(targetedCell, quadrants[i]);
+						}
+					}
+				}
+				break;
+			}
+			case "whiteQueen": {
+				let directions = ["up", "down", "left", "right"];
+				for (let i = 0; i < directions.length; i++) {
+					let continuing = "yes";
+					let targetedCell = targetHorizontalCell(cell, directions[i]);
+					while (continuing == "yes") {
+						if (!$(`#${targetedCell}`).is(':empty')) {
+							continuing = "no";
+						}
+						if ($(`#${targetedCell}`).children().hasClass('opponent')) {
+							cellArray.attackOptions.push(targetedCell)
+						}
+						else {
+							cellArray.moves.push(targetedCell);
+							targetedCell = targetHorizontalCell(targetedCell, directions[i]);
+						}
+					}
+				}
+				let quadrants = [1, 2, 3, 4];
+				for (let i = 0; i < quadrants.length; i++) {
+					let continuing = "yes";
+					let targetedCell = targetDiagonalCell(cell, quadrants[i]);
+					while (continuing == "yes") {
+						if (!$(`#${targetedCell}`).is(':empty')) {
+							continuing = "no";
+						}
+						if ($(`#${targetedCell}`).children().hasClass('opponent')) {
+							cellArray.attackOptions.push(targetedCell)
+						}
+						else {
+							cellArray.moves.push(targetedCell);
+							targetedCell = targetDiagonalCell(targetedCell, quadrants[i]);
+						}
+					}
+				}
+				break;
+			}
+			case "whiteKing": {
+				let directions = ["up", "down", "left", "right"];
+				for (let i = 0; i < directions.length; i++) {
+					let targetedCell = targetHorizontalCell(cell, directions[i]);
+					if (!$(`#${targetedCell}`).is(':empty')) {
+						continuing = "no";
+					}
+					if ($(`#${targetedCell}`).children().hasClass('opponent')) {
+						cellArray.attackOptions.push(targetedCell)
+					}
+					else {
+						cellArray.moves.push(targetedCell);
+						targetedCell = targetHorizontalCell(targetedCell, directions[i]);
+					}
+				}
+				let quadrants = [1, 2, 3, 4];
+				for (let i = 0; i < quadrants.length; i++) {
+					let targetedCell = targetDiagonalCell(cell, quadrants[i]);
+					if (!$(`#${targetedCell}`).is(':empty')) {
+						continuing = "no";
+					}
+					if ($(`#${targetedCell}`).children().hasClass('opponent')) {
+						cellArray.attackOptions.push(targetedCell)
+					}
+					else {
+						cellArray.moves.push(targetedCell);
+						targetedCell = targetDiagonalCell(targetedCell, quadrants[i]);
+					}
+				}
+				
+				break;
+			}
+			case "whiteKnight": {
+				let targetedCells = targetKnightCells(cell);
+				for (let i = 0; i < targetedCells.length; i++) {
+					let workingCell = targetedCells[i];
+					if ($(`#${workingCell}`).is(':empty')) {
+						cellArray.moves.push(workingCell);
+					}
+					else if ($(`#${workingCell}`).children().hasClass('opponent')) {
+						cellArray.attackOptions.push(workingCell)
+					}
 				}
 				break;
 			}
@@ -262,7 +367,7 @@ $(document).ready(function () {
 				break;
 		}
 		letter = iterateLetter(letter, directionalArray[0]);
-		let returnedCell = iterateLetter(letter, directionalArray[0]) + (number + directionalArray[1]);
+		let returnedCell = letter + (number + directionalArray[1]);
 		return returnedCell;
 	}
 
@@ -287,17 +392,28 @@ $(document).ready(function () {
 				break;
 		}
 		let returnedCell = iterateLetter(letter, directionalArray[0]) + (number + directionalArray[1]);
-		console.log("returnedCell: " + returnedCell);
 		return returnedCell;
+	}
+
+	function targetKnightCells(cell) {
+		let splitCell = cell.split('');
+		let letter = splitCell[0];
+		let number = parseInt(splitCell[1]);
+		let returnedCells = [];
+		let directionalArray = [[2, 1], [2, -1], [-2, 1], [-2, -1], [1, 2], [-1, 2], [1, -2], [-1, -2]];
+		directionalArray.forEach(function (coord) {
+			returnedCells.push(iterateLetter(letter, coord[0]) + (number + coord[1]));
+		});
+		return returnedCells;
 	}
 
 	function iterateLetter(letter, iteration) {
 		let response = String.fromCharCode(letter.charCodeAt() + iteration);
-		if(response == "`" || response == "i") {
+		if (response == "`" || response == "i") {
 			return "x";
 		}
 		else {
-			return reponse;
+			return response;
 		}
 	}
 
