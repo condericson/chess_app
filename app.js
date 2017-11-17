@@ -169,10 +169,10 @@ $(document).ready(function () {
 			}
 		});
 		cells.attackOptions.forEach(function (cell) {
-			if($(`#${cell}`).children().hasClass('opponent')) {
+			if ($(`#${cell}`).children().hasClass('opponent')) {
 				$(`#${cell}`).addClass('attackable');
 			}
-			
+
 		});
 		$('td').droppable("disable");
 		$('.indicating').droppable("enable");
@@ -196,12 +196,34 @@ $(document).ready(function () {
 				if (splitCell[1] == 2) {
 					cellArray.moves.push(splitCell[0] + (splitCell[1] + 2));
 				}
-				// var attackableCells = [(iterateLetter(splitCell[0], -1) + (splitCell[1] + 1)), (iterateLetter(splitCell[0], 1) + (splitCell[1] + 1))];
 				cellArray.attackOptions = [targetDiagonalCell(cell, 1), targetDiagonalCell(cell, 2)];
 				console.log(cellArray.attackOptions);
 				break;
 			}
 			case "whiteRook": {
+				let directions = ["up", "down", "left", "right"];
+				for(let i = 0; i < directions.length; i++) {
+					let continuing = "yes";
+					let targetedCell = targetHorizontalCell(cell, directions[i]);
+					while (continuing == "yes") {
+						console.log("this should be false:");
+						console.log($(`#${targetedCell}`));
+						console.log($(`#${targetedCell}`).is(':empty'));
+						if (!$(`#${targetedCell}`).is(':empty')) {
+							continuing = "no";
+							console.log("end");
+						}
+						if ($(`#${targetedCell}`).children().hasClass('opponent')) {
+							cellArray.attackOptions.push(targetedCell)
+						}
+						else {
+							cellArray.moves.push(targetedCell);
+							targetedCell = targetHorizontalCell(targetedCell, directions[i]);
+						}
+						console.log("here");
+					}
+					
+				}
 				break;
 			}
 			case "blackPawn": {
@@ -239,14 +261,44 @@ $(document).ready(function () {
 				directionalArray = [1, -1];
 				break;
 		}
+		letter = iterateLetter(letter, directionalArray[0]);
+		let returnedCell = iterateLetter(letter, directionalArray[0]) + (number + directionalArray[1]);
+		return returnedCell;
+	}
+
+	function targetHorizontalCell(cell, direction) {
+		let splitCell = cell.split('');
+		let letter = splitCell[0];
+		let number = parseInt(splitCell[1]);
+
+		let directionalArray = [];
+		switch (direction) {
+			case "up":
+				directionalArray = [0, 1];
+				break;
+			case "down":
+				directionalArray = [0, -1];
+				break;
+			case "left":
+				directionalArray = [-1, 0];
+				break;
+			case "right":
+				directionalArray = [1, 0];
+				break;
+		}
 		let returnedCell = iterateLetter(letter, directionalArray[0]) + (number + directionalArray[1]);
 		console.log("returnedCell: " + returnedCell);
 		return returnedCell;
 	}
 
-
 	function iterateLetter(letter, iteration) {
-		return String.fromCharCode(letter.charCodeAt() + iteration)
+		let response = String.fromCharCode(letter.charCodeAt() + iteration);
+		if(response == "`" || response == "i") {
+			return "x";
+		}
+		else {
+			return reponse;
+		}
 	}
 
 
