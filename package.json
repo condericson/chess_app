@@ -1,7 +1,6 @@
 {
   "name": "chess_app",
   "version": "1.0.0",
-  "description": "",
   "main": "index.js",
   "dependencies": {
     "express": "^4.16.2"
@@ -14,10 +13,11 @@
     "type": "git",
     "url": "git+https://github.com/condericson/chess_app.git"
   },
-  "author": "",
+  "author": "Connor Ericson",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/condericson/chess_app/issues"
   },
-  "homepage": "https://github.com/condericson/chess_app#readme"
+  "homepage": "https://github.com/condericson/chess_app#readme",
+  "description": ""
 }
