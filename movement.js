@@ -1,3 +1,5 @@
+
+
 function determineMovementOptions(pieceName, cell) {
 	let cellArray = {
 		moves: [],
@@ -17,7 +19,19 @@ function determineMovementOptions(pieceName, cell) {
 			cellArray.attackOptions = [targetDiagonalCell(cell, 1), targetDiagonalCell(cell, 2)];
 			break;
 		}
-		case "whiteRook": {
+		case "blackPawn": {
+			let firstCell = targetHorizontalCell(cell, "down");
+			cellArray.moves.push(firstCell);
+			let splitCell = cell.split('');
+			splitCell[1] = parseInt(splitCell[1]);
+			if (splitCell[1] == 7 && $(`#${firstCell}`).is(':empty')) {
+				cellArray.moves.push(targetHorizontalCell(cellArray.moves[0], "down"));
+			}
+			cellArray.attackOptions = [targetDiagonalCell(cell, 3), targetDiagonalCell(cell, 4)];
+			break;
+		}
+		case "whiteRook": 
+		case "blackRook": {
 			let directions = ["up", "down", "left", "right"];
 			for (let i = 0; i < directions.length; i++) {
 				let continuing = "yes";
@@ -37,7 +51,8 @@ function determineMovementOptions(pieceName, cell) {
 			}
 			break;
 		}
-		case "whiteBishop": {
+		case "whiteBishop": 
+		case "blackBishop": {
 			let quadrants = [1, 2, 3, 4];
 			for (let i = 0; i < quadrants.length; i++) {
 				let continuing = "yes";
@@ -57,7 +72,8 @@ function determineMovementOptions(pieceName, cell) {
 			}
 			break;
 		}
-		case "whiteQueen": {
+		case "whiteQueen": 
+		case "blackQueen": {
 			let directions = ["up", "down", "left", "right"];
 			for (let i = 0; i < directions.length; i++) {
 				let continuing = "yes";
@@ -94,7 +110,8 @@ function determineMovementOptions(pieceName, cell) {
 			}
 			break;
 		}
-		case "whiteKing": {
+		case "whiteKing": 
+		case "blackKing": {
 			let directions = ["up", "down", "left", "right"];
 			for (let i = 0; i < directions.length; i++) {
 				let targetedCell = targetHorizontalCell(cell, directions[i]);
@@ -123,10 +140,28 @@ function determineMovementOptions(pieceName, cell) {
 					targetedCell = targetDiagonalCell(targetedCell, quadrants[i]);
 				}
 			}
-			
+			if(boardState.kingMoved == false) {
+				if(boardState.selectedColor == "white") {
+					cellArray.moves.push('g1');
+					cellArray.moves.push('b1');
+					$(`#g1, #b1`).addClass('golden');
+				}
+				if(boardState.selectedColor == "black") {
+					cellArray.moves.push('g8');
+					cellArray.moves.push('b8');
+					$(`#g8, #b8`).addClass('golden');
+				}
+
+
+
+
+
+			}
+
 			break;
 		}
-		case "whiteKnight": {
+		case "whiteKnight": 
+		case "blackKnight": {
 			let targetedCells = targetKnightCells(cell);
 			for (let i = 0; i < targetedCells.length; i++) {
 				let workingCell = targetedCells[i];
@@ -139,15 +174,6 @@ function determineMovementOptions(pieceName, cell) {
 			}
 			break;
 		}
-		case "blackPawn": {
-			cellArray.moves.push(splitCell[0] + (splitCell[1] - 1));
-			if (splitCell[1] == 7) {
-				cellArray.moves.push(splitCell[0] + (splitCell[1] - 2));
-			}
-			break;
-		}
-
-
 	}
 	return cellArray;
 }

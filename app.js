@@ -1,4 +1,9 @@
-
+var boardState = {
+	areIndicatorsVisible: false,
+	selectedPieceCell: "zz",
+	selectedColor: "black",
+	kingMoved: false,
+}
 
 $(document).ready(function () {
 	console.log("Document ready...");
@@ -6,11 +11,7 @@ $(document).ready(function () {
 	
 
 
-	var boardState = {
-		areIndicatorsVisible: false,
-		selectedPieceCell: "zz",
-		selectedColor: "white",
-	}
+	
 
 	var pieces = {
 		whiteKing: "&#9812;",
@@ -30,10 +31,11 @@ $(document).ready(function () {
 
 
 	function modifyState(stateValue, value) {
-		boardState.stateValue = value;
+		boardState[stateValue] = value;
 		if (boardState.areIndicatorsVisible == false) {
 			$('.cell').removeClass("indicating");
 			$('.cell').removeClass("attackable");
+			$('.cell').removeClass("golden");
 		}
 	}
 
@@ -137,12 +139,13 @@ $(document).ready(function () {
 				var originalCell = $(ui.draggable).parent();
 				var dropped = ui.draggable;
 				var droppedOn = $(this);
-				console.log('droppedOn:');
-				console.log(droppedOn);
 				$(droppedOn).droppable("disable");
 				$(dropped).parent().droppable("enable");
 				$(droppedOn).empty();
 				$(dropped).detach().css({ top: 0, left: 0 }).appendTo(droppedOn);
+				if($(dropped).attr("data-piece") == "blackKing" || $(dropped).attr("data-piece") == "whiteKing") {
+					modifyState("kingMoved", true);
+				}
 				removeIndicator();
 			}
 		});

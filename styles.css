@@ -38,9 +38,15 @@ tbody > tr:nth-child(odd) td:nth-child(odd), tbody > tr:nth-child(even) td:nth-c
 	background-color: rgb(113, 166, 228);
 }
 
+#field > tbody > tr > td.indicating.golden {
+	background-color: gold;
+}
+
 #field > tbody > tr > td.attackable {
 	background-color: rgb(224, 72, 72);
 }
+
+
 
 thead {
 	position: relative;
